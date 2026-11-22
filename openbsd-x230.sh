@@ -191,6 +191,7 @@ claude|Claude|https://claude.ai/|site:claude.ai|Network;|app
 discord|Discord|https://discord.com/app|discord|Network;InstantMessaging;|app
 teams|Microsoft Teams|https://teams.microsoft.com/|teams|Network;InstantMessaging;|firefox
 whatsapp|WhatsApp|https://web.whatsapp.com/|whatsapp|Network;InstantMessaging;|app
+ytmusic|YouTube Music|https://music.youtube.com/|site:music.youtube.com|AudioVideo;Audio;|app
 zoom|Zoom|https://app.zoom.us/wc|Zoom|Network;VideoConference;|firefox
 '
 

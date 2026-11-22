@@ -69,7 +69,7 @@ Situação no OpenBSD 8.0: o login no PJe e a assinatura funcionam com **certifi
 - **Janelas:** encaixe nas bordas e nos cantos ao arrastar, Super+setas para metades, maximizar e minimizar, e Super+Espaço para abrir o menu.
 - **Aparência:** tema Greybird escuro, ícones Papirus, fontes Cantarell e JetBrains Mono, tela de login sem o console e sem bipe. Com `LAYOUT="gnome"`, o painel vira uma barra superior com dock.
 - **Terminal:** o Terminal do Xfce abre o fish; o shell de login (console, SSH e root) continua sendo o ksh, com histórico e autocompletar no `~/.kshrc`.
-- **Aplicativos web:** atalhos para ChatGPT, Claude, Discord, Teams, WhatsApp e Zoom, porque esses serviços não têm cliente para OpenBSD. Abrem no Chromium, em janela própria, menos o Teams e o Zoom, que abrem no Firefox por causa da webcam.
+- **Aplicativos web:** atalhos para ChatGPT, Claude, Discord, Teams, WhatsApp, YouTube Music e Zoom, porque esses serviços não têm cliente para OpenBSD (o YouTube Music entra no lugar do Spotify). Abrem no Chromium, em janela própria, menos o Teams e o Zoom, que abrem no Firefox por causa da webcam.
 - **Microfone e webcam:** gravação de áudio e de vídeo liberada no sistema, e a webcam entregue ao usuário a cada login gráfico.
 - **Discos externos:** `doas mount` e `doas umount` sem senha, mais o plugin de montagem do painel.
 
