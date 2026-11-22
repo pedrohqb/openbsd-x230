@@ -33,7 +33,7 @@ for f in "$HOME/.xsession" "$X/xsettings.xml" "$X/xfwm4.xml" "$X/keyboard-layout
          /etc/apm/suspend "$HOME/.config/autostart/dbus-sessao.desktop"; do
 	if [ -e "$f" ]; then bom; else ruim "arquivo $f"; fi
 done
-for a in chatgpt claude discord teams whatsapp zoom; do
+for a in chatgpt claude discord teams whatsapp ytmusic zoom; do
 	f="$HOME/.local/share/applications/webapp-$a.desktop"
 	if [ -e "$f" ]; then bom; else ruim "atalho web $a"; fi
 done
