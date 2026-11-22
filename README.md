@@ -2,6 +2,8 @@
 
 OpenBSD 8.0 com Xfce no ThinkPad X230: pós-instalação, revisão e PJeOffice Pro.
 
+![OpenBSD 8.0 com Xfce no ThinkPad X230: e-SAJ no Firefox com o Jamegão, PJeOffice Pro aberto e o fastfetch no terminal](captura.jpg)
+
 No OpenBSD não há só uma lista de pacotes: um script instala os programas e configura o sistema e a sessão. As listas ficam dentro do próprio script, por categoria e com a descrição de cada pacote, seguindo o `gnome.Brewfile` do repositório [brewfile](https://github.com/pedrohqb/brewfile) e os aplicativos que já vêm no Bluefin, com equivalentes para o que não existe no OpenBSD.
 
 ## Arquivos
