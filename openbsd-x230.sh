@@ -35,7 +35,8 @@ XKB_VARIANT="intl"                # ...internacional, com teclas mortas para os 
 TRACKPOINT_SCROLL="sim"           # rolar segurando o botão do meio do TrackPoint
 LOGIN_BG="#241f31"                # cor de fundo da tela de login (xenodm)
 TERMINAL_SHELL="/usr/local/bin/fish"  # shell que o Terminal do Xfce abre (vazio: o ksh de login)
-HYPERTHREADING="sim"              # usa os 4 threads do processador (o OpenBSD desliga por segurança; "nao" mantém o padrão)
+HYPERTHREADING="nao"              # "sim" usa os 4 threads do processador; o OpenBSD desliga por segurança (ataques de canal lateral)
+MIC_CAMERA="sim"                  # libera microfone e câmera para os programas (videochamadas); "nao" mantém o padrão do OpenBSD (silêncio e imagem preta)
 CACHE_DISCO=40                    # % da RAM para cache de arquivos (padrão do OpenBSD: 20)
 WIFI_SSID=""                      # nome da rede Wi-Fi de casa (vazio: não configura)
 WIFI_SENHA=""                     # senha da rede Wi-Fi (WPA2)
@@ -207,6 +208,12 @@ FALTANDO=""
 
 # Guarda uma cópia .orig antes da primeira alteração de um arquivo existente.
 backup() { [ -e "$1" ] && [ ! -e "$1.orig" ] && cp -p "$1" "$1.orig"; return 0; }
+# tirar_linha arquivo linha: apaga a linha exata, mantendo dono e permissões.
+tirar_linha() {
+	grep -qxF "$2" "$1" 2>/dev/null || return 1
+	{ grep -vxF "$2" "$1" || true; } > "$1.novo" && cat "$1.novo" > "$1"
+	rm -f "$1.novo"
+}
 
 # Grava a entrada padrão no arquivo indicado, criando a pasta e a cópia .orig.
 put() {
@@ -285,16 +292,23 @@ else
 		info "preencha WIFI_SSID e WIFI_SENHA no topo do script para gravar a rede"
 fi
 
-# doas: o grupo wheel administra com senha; montar e desmontar discos
-# externos não pede senha (é o que o botão "Mount" do painel usa).
-msg "doas (administração e montagem de discos externos)"
+# doas: o grupo wheel administra com senha. Sem senha, só montar e desmontar
+# o pendrive em ~/usb (é o que o botão "Mount" do painel usa). A regra fica
+# presa a esse ponto de montagem: um "mount" livre sem senha equivale a root
+# sem senha (dá para montar algo por cima do /etc, por exemplo).
+msg "doas (administração e montagem do pendrive)"
 backup /etc/doas.conf
 touch /etc/doas.conf
 chmod 600 /etc/doas.conf
+# Regras amplas de versões anteriores deste script.
+for antiga in "permit nopass $ALVO as root cmd mount" \
+              "permit nopass $ALVO as root cmd umount" \
+              "permit nopass $ALVO as root cmd ntfs-3g"; do
+	tirar_linha /etc/doas.conf "$antiga" && info "removida a regra ampla: $antiga"
+done
 for regra in "permit persist :wheel" \
-             "permit nopass $ALVO as root cmd mount" \
-             "permit nopass $ALVO as root cmd umount" \
-             "permit nopass $ALVO as root cmd ntfs-3g"; do
+             "permit nopass $ALVO as root cmd mount args $CASA/usb" \
+             "permit nopass $ALVO as root cmd umount args $CASA/usb"; do
 	grep -qxF "$regra" /etc/doas.conf || echo "$regra" >> /etc/doas.conf
 done
 doas -C /etc/doas.conf || warn "/etc/doas.conf com erro de sintaxe; confira (cópia em /etc/doas.conf.orig)"
@@ -333,8 +347,23 @@ touch /etc/sysctl.conf
 DESEMPENHO="kern.bufcachepercent=$CACHE_DISCO"
 # hw.blockcpu lista os tipos de núcleo fora do agendador; o padrão é SL
 # (S = Hyper-Threading, L = núcleos lentos). Sem o S, o Hyper-Threading volta.
-[ "$HYPERTHREADING" = "sim" ] && DESEMPENHO="$DESEMPENHO hw.blockcpu=L"
-for linha in "machdep.lidaction=1" "kern.audio.record=1" "kern.video.record=1" $DESEMPENHO; do
+if [ "$HYPERTHREADING" = "sim" ]; then
+	DESEMPENHO="$DESEMPENHO hw.blockcpu=L"
+elif tirar_linha /etc/sysctl.conf "hw.blockcpu=L"; then
+	sysctl hw.blockcpu=SL >/dev/null 2>&1 || true
+	info "Hyper-Threading desligado de novo (padrão do OpenBSD)"
+fi
+# kern.audio.record e kern.video.record: sem eles, o OpenBSD entrega silêncio
+# e imagem preta a quem tentar gravar.
+GRAVACAO=""
+if [ "$MIC_CAMERA" = "sim" ]; then
+	GRAVACAO="kern.audio.record=1 kern.video.record=1"
+else
+	for linha in "kern.audio.record=1" "kern.video.record=1"; do
+		tirar_linha /etc/sysctl.conf "$linha" && sysctl "${linha%=1}=0" >/dev/null 2>&1
+	done
+fi
+for linha in "machdep.lidaction=1" $GRAVACAO $DESEMPENHO; do
 	grep -qxF "$linha" /etc/sysctl.conf || echo "$linha" >> /etc/sysctl.conf
 	sysctl "$linha" >/dev/null 2>&1 || true
 done
@@ -787,7 +816,9 @@ cat <<EOF
          Depois: clique direito no painel > Painel > Adicionar novos itens >
          "Montar dispositivos". Nas propriedades, exclua os discos internos e,
          em Comandos, use:  doas mount %m  e  doas umount %m
-         Feche a janela do Thunar na pasta antes de desmontar.
+         Feche a janela do Thunar na pasta antes de desmontar. Só ~/usb monta
+         sem senha; um disco NTFS pede a senha:
+           doas ntfs-3g /dev/sd3i $CASA/usb
       4. Token ePass2003 no Firefox: Configurações > Privacidade e Segurança >
          Dispositivos de segurança > Carregar:
          /usr/local/lib/pkcs11/opensc-pkcs11.so

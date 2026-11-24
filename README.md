@@ -32,7 +32,7 @@ sh openbsd-x230/openbsd-x230.sh pedro
 reboot
 ```
 
-Antes de rodar, veja os **ajustes rápidos** no topo do script: rede Wi-Fi (`WIFI_SSID` e `WIFI_SENHA`), layout do painel (`LAYOUT`), tema, fontes, teclado, shell do terminal, Hyper-Threading e cache de disco. Depois de usar, apague a senha do Wi-Fi do arquivo e não a envie para o repositório.
+Antes de rodar, veja os **ajustes rápidos** no topo do script: rede Wi-Fi (`WIFI_SSID` e `WIFI_SENHA`), layout do painel (`LAYOUT`), tema, fontes, teclado, shell do terminal, Hyper-Threading (desligado, como no padrão do OpenBSD), microfone e câmera (liberados para videochamadas) e cache de disco. Depois de usar, apague a senha do Wi-Fi do arquivo e não a envie para o repositório.
 
 O script pode ser executado mais de uma vez: pula os pacotes já instalados e guarda uma cópia `.orig` de cada arquivo de configuração antes da primeira alteração. Se a sessão do Xfce estiver aberta, saia dela antes, para o Xfce não sobrescrever o que o script grava.
 
@@ -66,14 +66,14 @@ Situação no OpenBSD 8.0: o login no PJe e a assinatura funcionam com **certifi
 ## O que o script configura
 
 - **Sistema:** `syspatch`, `fw_update`, `doas` para o grupo `wheel`, grupo `_shutdown` (desligar pelo menu) e classe de login `desktop`, com limite de memória por processo de metade da RAM.
-- **Energia e desempenho:** `apmd -A` (frequência automática e suspensão com 7% de bateria), suspensão ao fechar a tampa, tela bloqueada ao voltar da suspensão (pelo `/etc/apm/suspend`, para a tampa, e pela opção do Xfce, para o botão), janela de saída sem o botão de hibernar (o swap padrão é menor que a RAM), escurecimento e desligamento da tela na bateria, `noatime`, cache de disco em 40% da RAM e Hyper-Threading ligado (`hw.blockcpu=L`).
+- **Energia e desempenho:** `apmd -A` (frequência automática e suspensão com 7% de bateria), suspensão ao fechar a tampa, tela bloqueada ao voltar da suspensão (pelo `/etc/apm/suspend`, para a tampa, e pela opção do Xfce, para o botão), janela de saída sem o botão de hibernar (o swap padrão é menor que a RAM), escurecimento e desligamento da tela na bateria, `noatime`, cache de disco em 40% da RAM e Hyper-Threading desligado, como no padrão do OpenBSD (com `HYPERTHREADING="sim"`, o script grava `hw.blockcpu=L` e usa os 4 threads, mas abre espaço para ataques de canal lateral entre programas).
 - **Entrada:** teclado inglês internacional com teclas mortas (`us`, variante `intl`) na sessão gráfica, rolagem com o botão do meio do TrackPoint e toque para clicar no touchpad.
 - **Janelas:** encaixe nas bordas e nos cantos ao arrastar, Super+setas para metades, maximizar e minimizar, e Super+Espaço para abrir o menu.
 - **Aparência:** tema Greybird escuro, ícones Papirus, fontes Cantarell e JetBrains Mono, tela de login sem o console e sem bipe. Com `LAYOUT="gnome"`, o painel vira uma barra superior com dock.
 - **Terminal:** o Terminal do Xfce abre o fish; o shell de login (console, SSH e root) continua sendo o ksh, com histórico e autocompletar no `~/.kshrc`.
 - **Aplicativos web:** atalhos para ChatGPT, Claude, Discord, Teams, WhatsApp, YouTube Music e Zoom, porque esses serviços não têm cliente para OpenBSD (o YouTube Music entra no lugar do Spotify). Abrem no Chromium, em janela própria, menos o Teams e o Zoom, que abrem no Firefox por causa da webcam.
 - **Microfone e webcam:** gravação de áudio e de vídeo liberada no sistema, e a webcam entregue ao usuário a cada login gráfico.
-- **Discos externos:** `doas mount` e `doas umount` sem senha, mais o plugin de montagem do painel.
+- **Discos externos:** `doas mount` e `doas umount` sem senha só para `~/usb`, mais o plugin de montagem do painel. Uma regra sem senha para qualquer `mount` equivaleria a root sem senha. Discos NTFS (`ntfs-3g`) pedem a senha.
 
 ## Observações
 
