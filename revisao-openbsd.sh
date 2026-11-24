@@ -18,7 +18,7 @@ done
 
 echo "== Ajustes do sistema (sysctl)"
 for par in machdep.lidaction=1 kern.audio.record=1 kern.video.record=1 \
-           kern.bufcachepercent=40 hw.blockcpu=L; do
+           kern.bufcachepercent=40; do
 	atual="$(sysctl -n "${par%%=*}" 2>/dev/null)"
 	if [ "$atual" = "${par#*=}" ]; then bom
 	else ruim "sysctl ${par%%=*} está em '$atual' (esperado ${par#*=})"; fi
@@ -47,7 +47,8 @@ if grep -q '/dev/video0' /etc/X11/xenodm/GiveConsole 2>/dev/null; then bom; else
 if grep -q 'setxkbmap' "$HOME/.xsession" 2>/dev/null; then bom; else ruim "teclado internacional em ~/.xsession"; fi
 if grep -q 'Wheel Emulation' "$HOME/.xsession" 2>/dev/null; then bom; else ruim "rolagem do TrackPoint em ~/.xsession"; fi
 n="$(sysctl -n hw.ncpuonline 2>/dev/null)"
-if [ "$n" = "4" ]; then bom; else ruim "threads ativos: $n (esperado 4)"; fi
+if [ "$n" = "2" ]; then bom; else ruim "threads ativos: $n (esperado 2, Hyper-Threading desligado)"; fi
+if grep -qxF "hw.blockcpu=L" /etc/sysctl.conf 2>/dev/null; then ruim "hw.blockcpu=L em /etc/sysctl.conf (liga o Hyper-Threading)"; else bom; fi
 if ifconfig egress 2>/dev/null | grep -q 'inet '; then bom; else ruim "rede sem endereço"; fi
 
 echo
