@@ -184,16 +184,17 @@ qemu                    # QEMU: emulador de máquinas (sem aceleração; para VM
 # Aplicativos web: id|Nome|URL|ícone|categorias|navegador
 # Ícone "site:dominio": baixa o ícone do próprio site (o tema não tem um para ele).
 # Navegador "app": janela própria no $WEBAPP_BROWSER. Navegador "firefox": janela
-# do Firefox, para Teams e Zoom, porque a webcam não funciona no Chromium do
-# OpenBSD (ele abre a câmera, mas não recebe imagem).
+# do Firefox. A webcam no Chromium precisa do kernel com o diff do Brad Smith
+# (kernel-video-brad.sh); com o kernel padrão do 8.0, use "firefox" no Teams e
+# no Zoom.
 WEBAPPS='
 chatgpt|ChatGPT|https://chatgpt.com/|site:chatgpt.com|Network;|app
 claude|Claude|https://claude.ai/|site:claude.ai|Network;|app
 discord|Discord|https://discord.com/app|discord|Network;InstantMessaging;|app
-teams|Microsoft Teams|https://teams.microsoft.com/|teams|Network;InstantMessaging;|firefox
+teams|Microsoft Teams|https://teams.microsoft.com/|teams|Network;InstantMessaging;|app
 whatsapp|WhatsApp|https://web.whatsapp.com/|whatsapp|Network;InstantMessaging;|app
 ytmusic|YouTube Music|https://music.youtube.com/|site:music.youtube.com|AudioVideo;Audio;|app
-zoom|Zoom|https://app.zoom.us/wc|Zoom|Network;VideoConference;|firefox
+zoom|Zoom|https://app.zoom.us/wc|Zoom|Network;VideoConference;|app
 '
 
 # ------------------------------------------------------------------------------
@@ -728,7 +729,7 @@ done
 # ------------------------------------------------------------------------------
 # 5. Usuário: aplicativos web e primeiro login
 # ------------------------------------------------------------------------------
-msg "Atalhos de aplicativos web (janela própria no $WEBAPP_BROWSER; Teams e Zoom no Firefox)"
+msg "Atalhos de aplicativos web (janela própria no $WEBAPP_BROWSER)"
 APPS="$CASA/.local/share/applications"
 printf '%s\n' "$WEBAPPS" | sed '/^$/d' | while IFS='|' read -r id nome url icone cats nav; do
 	if [ "$nav" = "firefox" ]; then cmd="firefox --new-window $url"
