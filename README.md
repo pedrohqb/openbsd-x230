@@ -34,6 +34,8 @@ reboot
 
 Antes de rodar, veja os **ajustes rápidos** no topo do script: rede Wi-Fi (`WIFI_SSID` e `WIFI_SENHA`), layout do painel (`LAYOUT`), tema, fontes, teclado, shell do terminal, Hyper-Threading (desligado, como no padrão do OpenBSD), microfone e câmera (liberados para videochamadas) e cache de disco. Depois de usar, apague a senha do Wi-Fi do arquivo e não a envie para o repositório.
 
+Quem instalou com uma versão anterior a novembro de 2026 pode aplicar só os ajustes de segurança (Hyper-Threading desligado e `doas` sem senha restrito a `~/usb`) com `doas sh seguranca-openbsd.sh`, sem rodar o script inteiro.
+
 O script pode ser executado mais de uma vez: pula os pacotes já instalados e guarda uma cópia `.orig` de cada arquivo de configuração antes da primeira alteração. Se a sessão do Xfce estiver aberta, saia dela antes, para o Xfce não sobrescrever o que o script grava.
 
 ### 3. Conferir
