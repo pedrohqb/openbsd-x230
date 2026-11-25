@@ -191,6 +191,7 @@ WEBAPPS='
 chatgpt|ChatGPT|https://chatgpt.com/|site:chatgpt.com|Network;|app
 claude|Claude|https://claude.ai/|site:claude.ai|Network;|app
 discord|Discord|https://discord.com/app|discord|Network;InstantMessaging;|app
+gemini|Gemini|https://gemini.google.com/app|site:gemini.google.com|Network;|app
 teams|Microsoft Teams|https://teams.microsoft.com/|teams|Network;InstantMessaging;|app
 whatsapp|WhatsApp|https://web.whatsapp.com/|whatsapp|Network;InstantMessaging;|app
 ytmusic|YouTube Music|https://music.youtube.com/|site:music.youtube.com|AudioVideo;Audio;|app
