@@ -14,7 +14,6 @@ No OpenBSD não há só uma lista de pacotes: um script instala os programas e c
 | `revisao-openbsd.sh` | Revisão: confere pacotes, serviços, ajustes e arquivos de configuração, sem alterar nada, e lista o que falta |
 | `pjeoffice-openbsd.sh` | Instala o PJeOffice Pro do CNJ na pasta pessoal, rodando no JDK 11 do OpenBSD |
 | `opensc-java.c` | Biblioteca que o script do PJeOffice compila para o Java assinar com token do OpenSC |
-| `seguranca-openbsd.sh` | Aplica numa instalação anterior a novembro de 2026 só os ajustes de segurança (Hyper-Threading e `doas`) |
 | `kernel-video-brad.sh` | Monta e instala um kernel do 8.0 com as errata oficiais e o diff do Brad Smith, para a webcam funcionar no Chromium |
 
 ## Uso
@@ -35,8 +34,6 @@ reboot
 ```
 
 Antes de rodar, veja os **ajustes rápidos** no topo do script: rede Wi-Fi (`WIFI_SSID` e `WIFI_SENHA`), layout do painel (`LAYOUT`), tema, fontes, teclado, shell do terminal, Hyper-Threading (desligado, como no padrão do OpenBSD), microfone e câmera (liberados para videochamadas) e cache de disco. Depois de usar, apague a senha do Wi-Fi do arquivo e não a envie para o repositório.
-
-Quem instalou com uma versão anterior a novembro de 2026 pode aplicar só os ajustes de segurança (Hyper-Threading desligado e `doas` sem senha restrito a `~/usb`) com `doas sh seguranca-openbsd.sh`, sem rodar o script inteiro.
 
 O script pode ser executado mais de uma vez: pula os pacotes já instalados e guarda uma cópia `.orig` de cada arquivo de configuração antes da primeira alteração. Se a sessão do Xfce estiver aberta, saia dela antes, para o Xfce não sobrescrever o que o script grava.
 
@@ -81,7 +78,7 @@ Situação no OpenBSD 8.0: o login no PJe e a assinatura funcionam com **certifi
 
 ## Observações
 
-- **Hardware:** o script foi feito e testado num ThinkPad X230 com placa Wi-Fi Intel trocada (driver `iwm`). A placa sem fio é detectada pelo sistema, não pelo nome; o que é próprio do X230 são a rolagem do TrackPoint e, no script de revisão, o nome `iwm0` e os 4 threads esperados.
+- **Hardware:** o script foi feito e testado num ThinkPad X230 com placa Wi-Fi Intel trocada (driver `iwm`). A placa sem fio é detectada pelo sistema, não pelo nome; o que é próprio do X230 são a rolagem do TrackPoint e, no script de revisão, o nome `iwm0` e os 2 threads esperados.
 - **Sem equivalente no OpenBSD 8.0:** Claude Code, Antigravity CLI (`agy`; no lugar dele, o atalho do Gemini), ONLYOFFICE, PDFsam Basic, BibleTime, Wine, Tessera e os drivers SafeNet, SafeSign e SerproID, que dependem de Linux. O PJeOffice Pro roda pelo script próprio (passo 4). O token ePass2003 funciona pelo OpenSC: no Firefox, carregue `/usr/local/lib/pkcs11/opensc-pkcs11.so` em Dispositivos de segurança.
 - **Pacotes com variantes ou mais de uma versão:** o `pkg_add` pergunta qual instalar. No script, `nome--variante` escolhe a variante (por exemplo `keepassxc--browser`) e `nome->=N` escolhe a versão (por exemplo `gimp->=3`). O script confere cada instalação com o `pkg_info` e lista no fim o que não instalou.
 - **Pendrive no painel:** o plugin só lista o que está no `/etc/fstab`. Veja o nome do pendrive com `dmesg | tail` (por exemplo `sd3`, depois dos discos internos e do volume criptografado) e registre-o: `/dev/sd3i /home/pedro/usb msdos rw,noauto,nodev,nosuid 0 0`. Feche a janela do Thunar na pasta antes de desmontar.

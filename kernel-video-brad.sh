@@ -1,5 +1,5 @@
 #!/bin/sh
-# Monta e instala, para teste, um kernel do OpenBSD 8.0 com todas as errata
+# Monta e instala um kernel do OpenBSD 8.0 com todas as errata
 # oficiais do kernel e o diff do Brad Smith em video(4)/uvideo(4)/utvfu(4)
 # (VIDIOC_REQBUFS(0), tech@ 19/11/2026).
 # Usa só HTTPS (não precisa de anoncvs pela porta 22).
