@@ -33,7 +33,7 @@ sh openbsd-x230/openbsd-x230.sh pedro
 reboot
 ```
 
-Antes de rodar, veja os **ajustes rápidos** no topo do script: rede Wi-Fi (`WIFI_SSID` e `WIFI_SENHA`), layout do painel (`LAYOUT`), tema, fontes, teclado, shell do terminal, Hyper-Threading (desligado, como no padrão do OpenBSD), microfone e câmera (liberados para videochamadas) e cache de disco. Depois de usar, apague a senha do Wi-Fi do arquivo e não a envie para o repositório.
+Antes de rodar, veja os **ajustes rápidos** no topo do script: rede Wi-Fi (`WIFI_SSID` e `WIFI_SENHA`), layout do painel (`LAYOUT`), tema, fontes, teclado, shell do terminal, Hyper-Threading (desligado, como no padrão do OpenBSD), microfone e câmera (liberados para videochamadas), cache de disco e os discos internos que o botão de montar do painel não lista (`DISCOS_INTERNOS`; o padrão é o do X230). Depois de usar, apague a senha do Wi-Fi do arquivo e não a envie para o repositório.
 
 O script pode ser executado mais de uma vez: pula os pacotes já instalados e guarda uma cópia `.orig` de cada arquivo de configuração antes da primeira alteração. Se a sessão do Xfce estiver aberta, saia dela antes, para o Xfce não sobrescrever o que o script grava.
 
