@@ -41,6 +41,7 @@ CACHE_DISCO=40                    # % da RAM para cache de arquivos (padrão do 
 WIFI_SSID=""                      # nome da rede Wi-Fi de casa (vazio: não configura)
 WIFI_SENHA=""                     # senha da rede Wi-Fi (WPA2)
 WEBAPP_BROWSER="chrome"           # navegador dos atalhos de aplicativos web
+DISCOS_INTERNOS="/dev/sd0* /dev/sd1* /dev/sd2*"  # discos que o botão de montar do painel não lista (no X230: os dois SSDs e o volume criptografado)
 
 # ------------------------------------------------------------------------------
 # Listas de pacotes (uma por categoria, na ordem do gnome.Brewfile)
@@ -663,13 +664,12 @@ MailReader=evolution
 EOF
 
 # Botão de montar do painel (plugin 19 do LAYOUT="xfce"): não lista os discos
-# internos (sd0 e sd1, os SSDs do X230; sd2, o volume criptografado) e monta
-# pelo doas, que libera ~/usb sem senha.
+# de $DISCOS_INTERNOS e monta pelo doas, que libera ~/usb sem senha.
 put "$CFG/xfce4/panel/xfce4-mount-plugin-19.rc" <<EOF
 on_mount_cmd=
 mount_command=doas mount %m
 umount_command=doas umount %m
-excluded_filesystems=/dev/sd0* /dev/sd1* /dev/sd2*
+excluded_filesystems=$DISCOS_INTERNOS
 icon=/usr/local/share/icons/hicolor/scalable/apps/xfce-mount.svg
 show_message_dialog=false
 include_networked_filesystems=false
