@@ -24,7 +24,7 @@ set -u
 # ------------------------------------------------------------------------------
 # Ajustes rápidos
 # ------------------------------------------------------------------------------
-LAYOUT="xfce"                     # "xfce": painel padrão do Xfce; "gnome": barra superior, dock e janelas só com o botão de fechar
+LAYOUT="xfce"                     # "xfce": painel inferior único, com o Whisker Menu; "gnome": barra superior, dock e janelas só com o botão de fechar
 GTK_THEME="Greybird-dark"         # tema das janelas e dos programas
 ICON_THEME="Papirus-Dark"         # tema de ícones
 UI_FONT="Cantarell 11"            # fonte da interface (a clássica do GNOME)
@@ -524,7 +524,7 @@ XML="$CFG/xfce4/xfconf/xfce-perchannel-xml"
 if [ "$LAYOUT" = "gnome" ]; then
 	DECOR="menu:close";  BOTOES="O|C";    MENU_SUPER="xfce4-popup-whiskermenu"
 else
-	DECOR="menu:minimize,maximize,close"; BOTOES="O|HMC"; MENU_SUPER="xfce4-popup-applicationsmenu"
+	DECOR="icon,menu:minimize,maximize,close"; BOTOES="O|HMC"; MENU_SUPER="xfce4-popup-whiskermenu"
 fi
 
 msg "Aparência: $GTK_THEME, ícones $ICON_THEME, fonte $UI_FONT (layout: $LAYOUT)"
@@ -605,6 +605,7 @@ if [ -n "$TERMINAL_SHELL" ]; then
 	put "$XML/xfce4-terminal.xml" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <channel name="xfce4-terminal" version="1.0">
+  <property name="font-use-system" type="bool" value="true"/>
   <property name="run-custom-command" type="bool" value="true"/>
   <property name="custom-command" type="string" value="$TERMINAL_SHELL"/>
 </channel>
@@ -630,8 +631,57 @@ put "$XML/xfce4-session.xml" <<EOF
 </channel>
 EOF
 
-# Só no LAYOUT="gnome": sem ícones na área de trabalho, barra superior e dock.
-# No LAYOUT="xfce", o painel e a área de trabalho ficam no padrão do Xfce.
+# Protetor de tela: só apaga a tela, e bloqueia ao suspender.
+put "$XML/xfce4-screensaver.xml" <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<channel name="xfce4-screensaver" version="1.0">
+  <property name="saver" type="empty">
+    <property name="mode" type="int" value="0"/>
+  </property>
+  <property name="lock" type="empty">
+    <property name="sleep-activation" type="bool" value="true"/>
+  </property>
+</channel>
+EOF
+
+# Ristretto (imagens): miniaturas à esquerda.
+put "$XML/ristretto.xml" <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<channel name="ristretto" version="1.0">
+  <property name="window" type="empty">
+    <property name="navigationbar" type="empty">
+      <property name="position" type="string" value="left"/>
+    </property>
+  </property>
+</channel>
+EOF
+
+# Navegador e cliente de e-mail padrão (exo-open e as teclas de navegador e e-mail).
+put "$CFG/xfce4/helpers.rc" <<EOF
+WebBrowser=firefox
+MailReader=evolution
+EOF
+
+# Botão de montar do painel (plugin 19 do LAYOUT="xfce"): não lista os discos
+# internos (sd0 e sd1, os SSDs do X230; sd2, o volume criptografado) e monta
+# pelo doas, que libera ~/usb sem senha.
+put "$CFG/xfce4/panel/xfce4-mount-plugin-19.rc" <<EOF
+on_mount_cmd=
+mount_command=doas mount %m
+umount_command=doas umount %m
+excluded_filesystems=/dev/sd0* /dev/sd1* /dev/sd2*
+icon=/usr/local/share/icons/hicolor/scalable/apps/xfce-mount.svg
+show_message_dialog=false
+include_networked_filesystems=false
+trim_devicenames=true
+td_count=14
+exclude_selected_filesystems=true
+exclude_devicenames_in_menu=false
+eject_cddrives=false
+EOF
+
+# LAYOUT="gnome": sem ícones na área de trabalho, barra superior e dock.
+# LAYOUT="xfce": um painel só, embaixo (no "else", mais abaixo).
 if [ "$LAYOUT" = "gnome" ]; then
 # Área de trabalho sem ícones, como no GNOME.
 put "$XML/xfce4-desktop.xml" <<EOF
@@ -714,6 +764,125 @@ put "$XML/xfce4-panel.xml" <<EOF
       <property name="appearance" type="uint" value="0"/>
     </property>
     <property name="plugin-10" type="string" value="docklike"/>
+  </property>
+</channel>
+EOF
+else
+# Área de trabalho: ícones da pasta pessoal, do sistema de arquivos e da
+# lixeira, sem os de discos removíveis.
+put "$XML/xfce4-desktop.xml" <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<channel name="xfce4-desktop" version="1.0">
+  <property name="desktop-icons" type="empty">
+    <property name="file-icons" type="empty">
+      <property name="show-device-removable" type="bool" value="true"/>
+      <property name="show-device-fixed" type="bool" value="true"/>
+      <property name="show-unknown-removable" type="bool" value="true"/>
+      <property name="show-removable" type="bool" value="false"/>
+    </property>
+  </property>
+</channel>
+EOF
+
+# Painel único, embaixo: Whisker Menu com o logo do OpenBSD e os favoritos,
+# áreas de trabalho, janelas agrupadas, bandeja, botão de montar, volume
+# (sndio), relógio e um botão só com bloquear e sair.
+msg "Painel: barra inferior com o Whisker Menu"
+put "$XML/xfce4-panel.xml" <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<channel name="xfce4-panel" version="1.0">
+  <property name="configver" type="int" value="2"/>
+  <property name="panels" type="array">
+    <value type="int" value="1"/>
+    <property name="dark-mode" type="bool" value="true"/>
+    <property name="panel-1" type="empty">
+      <property name="position" type="string" value="p=8;x=0;y=0"/>
+      <property name="length" type="double" value="100"/>
+      <property name="position-locked" type="bool" value="true"/>
+      <property name="icon-size" type="uint" value="16"/>
+      <property name="size" type="uint" value="26"/>
+      <property name="mode" type="uint" value="0"/>
+      <property name="plugin-ids" type="array">
+        <value type="int" value="20"/>
+        <value type="int" value="4"/>
+        <value type="int" value="2"/>
+        <value type="int" value="3"/>
+        <value type="int" value="5"/>
+        <value type="int" value="6"/>
+        <value type="int" value="19"/>
+        <value type="int" value="1"/>
+        <value type="int" value="7"/>
+        <value type="int" value="8"/>
+        <value type="int" value="9"/>
+        <value type="int" value="10"/>
+      </property>
+    </property>
+  </property>
+  <property name="plugins" type="empty">
+    <property name="plugin-20" type="string" value="whiskermenu">
+      <property name="button-icon" type="string" value="distributor-logo-openbsd"/>
+      <property name="show-button-title" type="bool" value="true"/>
+      <property name="view-mode" type="int" value="1"/>
+      <property name="favorites" type="array">
+        <value type="string" value="firefox.desktop"/>
+        <value type="string" value="org.gnome.Evolution.desktop"/>
+        <value type="string" value="webapp-whatsapp.desktop"/>
+        <value type="string" value="webapp-ytmusic.desktop"/>
+        <value type="string" value="org.keepassxc.KeePassXC.desktop"/>
+        <value type="string" value="webapp-claude.desktop"/>
+        <value type="string" value="webapp-chatgpt.desktop"/>
+        <value type="string" value="webapp-gemini.desktop"/>
+        <value type="string" value="thunar.desktop"/>
+        <value type="string" value="xfce4-terminal.desktop"/>
+      </property>
+    </property>
+    <property name="plugin-4" type="string" value="pager"/>
+    <property name="plugin-2" type="string" value="tasklist">
+      <property name="grouping" type="uint" value="1"/>
+    </property>
+    <property name="plugin-3" type="string" value="separator">
+      <property name="expand" type="bool" value="true"/>
+      <property name="style" type="uint" value="0"/>
+    </property>
+    <property name="plugin-5" type="string" value="separator">
+      <property name="style" type="uint" value="0"/>
+    </property>
+    <property name="plugin-6" type="string" value="systray">
+      <property name="square-icons" type="bool" value="true"/>
+    </property>
+    <property name="plugin-19" type="string" value="xfce4-mount-plugin"/>
+    <property name="plugin-1" type="string" value="mixer">
+      <property name="sound-card" type="string" value="ControledeVolumedoSndio"/>
+      <property name="track" type="string" value="output"/>
+      <property name="command" type="string" value="xfce4-mixer"/>
+    </property>
+    <property name="plugin-7" type="string" value="separator">
+      <property name="style" type="uint" value="0"/>
+    </property>
+    <property name="plugin-8" type="string" value="clock">
+      <property name="mode" type="uint" value="2"/>
+      <property name="digital-layout" type="uint" value="3"/>
+    </property>
+    <property name="plugin-9" type="string" value="separator">
+      <property name="style" type="uint" value="0"/>
+    </property>
+    <property name="plugin-10" type="string" value="actions">
+      <property name="appearance" type="uint" value="0"/>
+      <property name="items" type="array">
+        <value type="string" value="+lock-screen"/>
+        <value type="string" value="-switch-user"/>
+        <value type="string" value="-separator"/>
+        <value type="string" value="-suspend"/>
+        <value type="string" value="-hibernate"/>
+        <value type="string" value="-hybrid-sleep"/>
+        <value type="string" value="-separator"/>
+        <value type="string" value="-shutdown"/>
+        <value type="string" value="-restart"/>
+        <value type="string" value="-separator"/>
+        <value type="string" value="+logout"/>
+        <value type="string" value="-logout-dialog"/>
+      </property>
+    </property>
   </property>
 </channel>
 EOF
@@ -815,11 +984,9 @@ cat <<EOF
       3. Pendrive no painel: veja o nome dele com 'dmesg | tail' (por exemplo sd3)
          e registre-o no /etc/fstab:
            /dev/sd3i $CASA/usb msdos rw,noauto,nodev,nosuid 0 0
-         Depois: clique direito no painel > Painel > Adicionar novos itens >
-         "Montar dispositivos". Nas propriedades, exclua os discos internos e,
-         em Comandos, use:  doas mount %m  e  doas umount %m
-         Feche a janela do Thunar na pasta antes de desmontar. Só ~/usb monta
-         sem senha; um disco NTFS pede a senha:
+         O botão de montar já vem no painel (LAYOUT="xfce"), com os comandos
+         doas mount %m e doas umount %m. Feche a janela do Thunar na pasta
+         antes de desmontar. Só ~/usb monta sem senha; um disco NTFS pede a senha:
            doas ntfs-3g /dev/sd3i $CASA/usb
       4. Token ePass2003 no Firefox: Configurações > Privacidade e Segurança >
          Dispositivos de segurança > Carregar:
